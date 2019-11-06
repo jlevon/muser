@@ -367,7 +367,6 @@ lm_irq_trigger(lm_ctx_t *lm_ctx, uint32_t subindex);
  * linear guest physical address span may need to be split into multiple
  * scatter/gather regions due to limitations of how memory can be mapped.
  *
- * @lm_ctx: the libmuser context
  * @dma_addr: the guest physical address
  * @len: size of memory to be mapped
  * @sg: array that receives the scatter/gather entries to be mapped
@@ -380,8 +379,8 @@ lm_irq_trigger(lm_ctx_t *lm_ctx, uint32_t subindex);
  *              entries necessary to complete this request.
  */
 int
-lm_addr_to_sg(lm_ctx_t *lm_ctx, dma_addr_t dma_addr, uint32_t len,
-              dma_sg_t *sg, int max_sg);
+lm_addr_to_sg(lm_ctx_t *lm_ctx, dma_addr_t dma_addr,
+              uint32_t len, dma_sg_t *sg, int max_sg);
 
 /**
  * Maps a list scatter/gather entries from the guest's physical address space

@@ -40,3 +40,6 @@ add_subdirectory(kmod)
 
 # samples
 add_subdirectory(samples)
+
+# unit tests
+add_subdirectory(test)

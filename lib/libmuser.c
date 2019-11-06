@@ -983,6 +983,11 @@ dev_attach(const char *uuid)
     int dev_fd;
     int err;
 
+    if (uuid == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
     err = asprintf(&path, "/dev/" MUSER_DEVNODE "/%s", uuid);
     if (err != (int)(strlen(MUSER_DEVNODE) + strlen(uuid) + 6)) {
         return -1;
@@ -1305,8 +1310,8 @@ lm_get_region_info(lm_ctx_t *lm_ctx)
 }
 
 inline int
-lm_addr_to_sg(lm_ctx_t *lm_ctx, dma_addr_t dma_addr,
-              uint32_t len, dma_sg_t *sg, int max_sg)
+lm_addr_to_sg(lm_ctx_t *lm_ctx, dma_addr_t dma_addr, uint32_t len,
+              dma_sg_t *sg, int max_sg)
 {
     return dma_addr_to_sg(lm_ctx->dma, dma_addr, len, sg, max_sg);
 }
