@@ -28,37 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-set(muser SHARED
-    ../kmod/muser.h
-    muser.h
-    muser_priv.h
-    pci.h
-    common.h
-    dma.h
-    dma.c
-    libmuser.c
-    libmuser_pci.c
-    cap.c
-    cap.h)
-set(CMAKE_C_FLAGS "-Wall -Wextra -Werror")
-set_target_properties(muser PROPERTIES PUBLIC_HEADER "muser.h;pci.h")
-set(MUSER_HEADERS_DIR ${CMAKE_INSTALL_INCLUDEDIR}/muser)
-install(TARGETS muser
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${MUSER_HEADERS_DIR})
-install(DIRECTORY "caps"
-        DESTINATION ${MUSER_HEADERS_DIR}
-        FILES_MATCHING PATTERN "*.h")
-
-if (DEFINED ENV{PYTHON_BINDINGS})
-
-        add_custom_target(python_bindings_build ALL
-                COMMAND python setup.py build -b ${CMAKE_BINARY_DIR}
-                DEPENDS python_bindings.c setup.py
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
-                SOURCES python_bindings.c setup.py)
-        # execute_process seems to only execute a single command, e.g. it can't
-        # handle two commands joined by &&
-        install(CODE "execute_process(COMMAND ${CMAKE_SOURCE_DIR}/lib/python_bindings_install.sh ${CMAKE_SOURCE_DIR})")
-
-endif()
+add_executable(tests tests.c)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--wrap=dev_attach")
+target_link_libraries(tests cmocka muser)
