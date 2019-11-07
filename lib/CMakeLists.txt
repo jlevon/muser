@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-set(muser SHARED
+add_library(muser SHARED
     ../kmod/muser.h
     muser.h
     muser_priv.h

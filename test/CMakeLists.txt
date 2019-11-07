@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-add_executable(tests tests.c)
+add_executable(tests tests.c mock.c)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--wrap=dev_attach")
-target_link_libraries(tests cmocka muser)
+set(CMAKE_EXE_LINKER_FLAGS "-ldl")
+target_link_libraries(tests cmocka)

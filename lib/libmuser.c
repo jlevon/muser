@@ -939,16 +939,13 @@ dev_detach(int dev_fd)
 }
 
 int
-#if 1
-__attribute__((weak))
-#endif
 dev_attach(const char *uuid)
 {
     char *path;
     int dev_fd;
     int err;
 
-    printf("XXX real\n");
+    printf("XXX real dev attach\n");
 
     if (uuid == NULL) {
         errno = EINVAL;

@@ -36,42 +36,79 @@
 #include <cmocka.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "../lib/muser.h"
 #include "../lib/libmuser_priv.h"
 
-int __wrap_dev_attach(const char *uuid)
-{
-    printf("XXX mocked\n");
-    return 0;
+#include "mock.h"
+
+/*
+ * TODO if we have one binary per function we need to test then all mock
+ * functions will _always_ be mocks, so we won't have to check whether it's
+ * currently patched, they will always be patched.
+ */
+int dev_attach(const char *path) {
+    struct mock_object *m = mock_find(__func__);
+    assert(m);
+    if (!is_patched(m))
+        /*
+         * XXX the function can be called as follows:
+         * ((void (*)()) real(m))(path);
+         * However we do need to know the return type.
+         */
+        return ((int (*)(const char*))real(m))(path);
+    return mock();
 }
 
-static void
-test_lm_ctx_create(void **state)
-{
-    lm_dev_info_t dev_info = {0};
-    lm_ctx_t *ctx;
+lm_ctx_t *lm_ctx_create(lm_dev_info_t *dev_info) {
+    struct mock_object *m = mock_find(__func__);
+    assert(m);
+    if (!is_patched(m))
+        return ((lm_ctx_t* (*)(lm_dev_info_t*))real(m))(dev_info);
+    return (lm_ctx_t*)mock();
+}
 
-    printf("calling dev_attach\n");
-    dev_attach(NULL);
-    printf("calling __wrap_dev_attach\n");
-    __wrap_dev_attach(NULL);
-    printf("calling __real_dev_attach\n");
-    __real_dev_attach(NULL);
+static void test_lm_ctx_create(void **state __attribute__((unused))) {
 
-    /* empty UUID */
-    assert_null(lm_ctx_create(&dev_info));
+    int err;
+    lm_dev_info_t d = {0};
+    lm_ctx_t *c;
 
-    /* valid UUID */
-    dev_info.uuid = strdup("some uuid");
-    will_return(__wrap_dev_attach, 0xdeadbeef);
-    ctx = lm_ctx_create(&dev_info);
-    assert_non_null(ctx);
-    assert_int_equal(0xdeadbeef, ctx->fd);
+    err = patch(dev_attach);
+    assert(!err);
+
+    /* XXX no dev_info */
+    c = lm_ctx_create(NULL);
+    assert_null(c);
+
+    /* XXX dev_attach fails */
+    d.uuid = "some UUID";
+    will_return(dev_attach, -1);
+    c = lm_ctx_create(&d);
+    assert_null(c);
+
+    /* XXX success */
+    d.pvt = (void*)0xdeadbeef;
+    will_return(dev_attach, 0);
+    c = lm_ctx_create(&d);
+    assert_non_null(c);
+    assert_ptr_equal(c->pvt, d.pvt);
+    //assert_equal(c->pci_info, pci_info);
 }
 
 int main(void)
 {
+    int err;
+    char *symbols[] = {"lm_ctx_create", "dev_attach"};
+
+    err = mock_init("libmuser.so", ARRAY_SIZE(symbols), symbols);
+
+    if (err) {
+        fprintf(stderr, "failed to initialize mocks: %d\n", err);
+        exit(EXIT_FAILURE);
+    }
+
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_lm_ctx_create),
     };
