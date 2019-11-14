@@ -231,20 +231,12 @@ typedef ssize_t (lm_cap_access_t) (void *pvt, uint8_t id,
 typedef struct {
 
     /*
-     * Capability ID, as defined by the PCI specification. Also defined as
-     * PCI_CAP_ID_XXX in <linux/pci_regs.h>.
-     */
-    uint8_t id;
-
-    /*
      * Size of the capability.
      */
     size_t size;
 
-    /*
-     * Function to call back when the capability gets read or written.
-     */
-    lm_cap_access_t *fn;
+    char *buf;
+
 } lm_cap_t;
 
 #define LM_MAX_CAPS (PCI_CFG_SPACE_SIZE - PCI_STD_HEADER_SIZEOF) / PCI_CAP_SIZEOF
@@ -286,17 +278,8 @@ typedef struct {
      */
     int (*reset)    (void *pvt);
 
-    /*
-     * PCI capabilities. The user needs to only define the ID and size of each
-     * capability. The actual capability is not maintained by libmuser. When a
-     * capability is accessed the appropriate callback function is called.
-     */
     lm_cap_t        caps[LM_MAX_CAPS];
 
-    /*
-     * Number of capabilities in above array.
-     */
-    int             nr_caps;
 } lm_dev_info_t;
 
 /**

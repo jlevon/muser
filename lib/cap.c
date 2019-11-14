@@ -41,8 +41,8 @@
 struct cap {
     uint8_t         start;
     uint8_t         end;
-    uint8_t         id;
     lm_cap_access_t *fn;
+    char            buf;
 };
 
 struct caps {
@@ -200,52 +200,74 @@ cap_maybe_access(struct caps *caps, void *pvt, char *buf, size_t count,
 }
 
 static bool
-cap_is_valid(uint8_t id)
+cap_id_is_valid(uint8_t id)
 {
     return id >= PCI_CAP_ID_PM && id <= PCI_CAP_ID_MAX;
 }
 
+static bool
+cap_size_is_valid(int size)
+{
+    return size >= PCI_CAP_SIZEOF && size % PCI_CAP_SIZEOF == 0;
+}
+
+static bool
+cap_is_valid(uint8_t id, int size)
+{
+    return cap_id_is_valid(id) && cap_size_is_valid(size);
+}
+
+void
+caps_destroy(struct caps *caps)
+{
+    int i;
+
+    if (caps == NULL) {
+        return;
+    }
+
+    for (i = 0; i < LM_MAX_CAPS && caps->caps[i].buf != NULL; i++) {
+        free(caps->caps[i].buf);
+    }
+
+    free(caps);
+}
+
 struct caps *
-caps_create(const lm_cap_t *lm_caps, int nr_caps)
+caps_create(const lm_cap_t *lm_caps)
 {
     uint8_t prev_end;
     int i, err = 0;
     struct caps *caps = NULL;
 
-    if (nr_caps <= 0 || nr_caps >= LM_MAX_CAPS) {
-        err = EINVAL;
-        goto out;
-    }
-
     assert(lm_caps);
 
     caps = calloc(1, sizeof *caps);
     if (!caps) {
-        err = errno;
-        goto out;
+        return NULL;
     }
 
     prev_end = PCI_STD_HEADER_SIZEOF - 1;
-    for (i = 0; i < nr_caps; i++) {
-        if (!cap_is_valid(lm_caps[i].id) || !lm_caps[i].fn || !lm_caps[i].size) {
-            err = EINVAL;
+    for (i = 0; i < LM_MAX_CAPS && lm_caps[i].size != 0; i++) {
+        if (lm_caps[i].buf == NULL || !cap_is_valid(lm_caps[i].buf[PCI_CAP_LIST_ID], lm_caps[i].size)) {
             goto out;
         }
 
-        caps->caps[i].id = lm_caps[i].id;
+        caps->caps[i].buf = malloc(lm_caps[i].size);
+        if (caps->caps[i] == NULL) {
+            goto out;            
+        }
+        memcpy(caps->caps[i].buf, lm_caps[i].buf, lm_caps[i].size);
         caps->caps[i].fn = lm_caps[i].fn;
-        /* FIXME PCI capabilities must be dword aligned. */
-        caps->caps[i].start = prev_end + 1;
-        caps->caps[i].end = prev_end = caps->caps[i].start + lm_caps[i].size - 1;
+        caps->caps[i].start = prev_end + PCI_CAP_LIST_NEXT;
+        caps->caps[i].end = prev_end = caps->caps[i].start + lm_caps[i].size - PCI_CAP_LIST_NEXT;
     }
-    caps->nr_caps = nr_caps;
+    caps->nr_caps = i;
+    return caps;
 
 out:
-    if (err) {
-        free(caps);
-        caps = NULL;
-    }
-    return caps;
+    caps_destroy(caps);
+    return NULL;
 }
 
 /* ex: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab: */
