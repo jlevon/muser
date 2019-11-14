@@ -211,45 +211,6 @@ typedef enum {
 typedef void (lm_log_fn_t) (void *pvt, const char *msg);
 
 /**
- * Callback function that gets called when a capability is accessed. The
- * callback is not called when the ID and next fields are accessed, these are
- * handled by the library.
- *
- * @pvt: private pointer
- * @id: capability ID being accessed
- * @buf: pointer to data being read or written
- * @count: number of bytes being read or written
- * @offset: offset within the capability
- * @is_write: whether the capability is read or written
- *
- * @returns the number of bytes read or written
- */
-typedef ssize_t (lm_cap_access_t) (void *pvt, uint8_t id,
-                                   char *buf, size_t count,
-                                   loff_t offset, bool is_write);
-
-typedef struct {
-
-    /*
-     * Capability ID, as defined by the PCI specification. Also defined as
-     * PCI_CAP_ID_XXX in <linux/pci_regs.h>.
-     */
-    uint8_t id;
-
-    /*
-     * Size of the capability.
-     */
-    size_t size;
-
-    /*
-     * Function to call back when the capability gets read or written.
-     */
-    lm_cap_access_t *fn;
-} lm_cap_t;
-
-#define LM_MAX_CAPS (PCI_CFG_SPACE_SIZE - PCI_STD_HEADER_SIZEOF) / PCI_CAP_SIZEOF
-
-/**
  * Device information structure, used to create the lm_ctx.
  * To be filled and passed to lm_ctx_create()
  */
@@ -286,17 +247,6 @@ typedef struct {
      */
     int (*reset)    (void *pvt);
 
-    /*
-     * PCI capabilities. The user needs to only define the ID and size of each
-     * capability. The actual capability is not maintained by libmuser. When a
-     * capability is accessed the appropriate callback function is called.
-     */
-    lm_cap_t        caps[LM_MAX_CAPS];
-
-    /*
-     * Number of capabilities in above array.
-     */
-    int             nr_caps;
 } lm_dev_info_t;
 
 /**
@@ -308,6 +258,13 @@ typedef struct {
  */
 lm_ctx_t *
 lm_ctx_create(const lm_dev_info_t *dev_info);
+
+/**
+ * Adds a PCI capability. This must be done before calling lm_ctx_drive or
+ * lm_ctx_run.
+ */
+int
+lm_pci_cap_add(lm_ctx_t *lm_ctx, uint16_t id, uint16_t size, char *buf);
 
 /**
  * Destroys libmuser context.

@@ -86,7 +86,6 @@ struct lm_ctx {
     lm_log_fn_t             *log;
     lm_pci_info_t           pci_info;
     lm_pci_config_space_t   *pci_config_space;
-    struct caps             *caps;
     lm_irqs_t               irqs; /* XXX must be last */
 };
 MUST_BE_LAST(struct lm_ctx, irqs, lm_irqs_t);
@@ -693,6 +692,7 @@ handle_pci_config_space_access(lm_ctx_t *lm_ctx, char *buf, size_t count,
     return count;
 }
 
+/* TODO rename to lm_access_aligned */
 static ssize_t
 do_access(lm_ctx_t *lm_ctx, char *buf, size_t count, loff_t pos, bool is_write)
 {
@@ -739,11 +739,12 @@ do_access(lm_ctx_t *lm_ctx, char *buf, size_t count, loff_t pos, bool is_write)
 
 /*
  * Returns the number of bytes processed on success or a negative number on
- * error.
+ * error. If this is an access to the PCI configuration space, then the
+ * standard PCI header has already been accessed.
  *
- * TODO function name same lm_access_t, fix
+ * TODO rename to access_pci_region
  */
-ssize_t
+static ssize_t
 lm_access(lm_ctx_t *lm_ctx, char *buf, size_t count, loff_t *ppos,
           bool is_write)
 {
@@ -841,8 +842,7 @@ muser_access(lm_ctx_t *lm_ctx, struct muser_cmd *cmd, bool is_write)
      * _count is how much there's left to be processed by lm_access
      */
     count -= _count;
-    ret = lm_access(lm_ctx, rwbuf + count, _count, &cmd->rw.pos,
-                    is_write);
+    ret = lm_access(lm_ctx, rwbuf + count, _count, &cmd->rw.pos, is_write);
     if (!is_write && ret >= 0) {
         ret += count;
         err = post_read(lm_ctx, rwbuf, ret);

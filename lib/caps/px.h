@@ -141,11 +141,12 @@ struct pxcap {
     struct pxlcap pxlcap;
     struct pxlc pxlc;
     struct pxls pxls;
-    uint8_t pad[0x10];
+    uint8_t pad1[0x10];
     struct pxdcap2 pxdcap2;
     struct pxdc2 pxdc2;
+    uint8_t pad2[0x2];
 } __attribute__((packed));
-_Static_assert(sizeof(struct pxcap) == 0x2a,
+_Static_assert(sizeof(struct pxcap) == PCI_CAP_EXP_ENDPOINT_SIZEOF_V2,
 		"bad PCI Express Capability size");
 
 #endif /* LM_PCI_CAP_PX_H */

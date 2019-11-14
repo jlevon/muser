@@ -178,7 +178,8 @@ typedef union {
         uint8_t mlat;
     } __attribute__ ((packed));
 } __attribute__ ((packed)) lm_pci_hdr_t;
-_Static_assert(sizeof(lm_pci_hdr_t) == 0x40, "bad PCI header size");
+_Static_assert(sizeof(lm_pci_hdr_t) == PCI_STD_HEADER_SIZEOF, "bad PCI header size");
+_Static_assert(offsetof(lm_pci_hdr_t, cap), PCI_CAPABILITY_LIST);
 
 typedef struct {
     uint8_t raw[PCI_CFG_SPACE_SIZE - PCI_STD_HEADER_SIZEOF];
