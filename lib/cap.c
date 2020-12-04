@@ -48,8 +48,9 @@
  * access is valid, e.g. it doesn't span multiple capabilities.
  */
 struct cap {
-    uint8_t start;
-    uint8_t end;
+    uint8_t             start;
+    uint8_t             end;
+    vfu_cap_access_t    *fn;
 };
 
 struct caps {
@@ -418,7 +419,7 @@ cap_maybe_access(vfu_ctx_t *vfu_ctx, struct caps *caps, char *buf, size_t count,
 }
 
 struct caps *
-caps_create(vfu_ctx_t *vfu_ctx, vfu_cap_t **vfu_caps, int nr_caps, int *err)
+caps_create(vfu_ctx_t *vfu_ctx, vfu_pci_cap_t **vfu_caps, int nr_caps, int *err)
 {
     int i;
     uint8_t *prev;

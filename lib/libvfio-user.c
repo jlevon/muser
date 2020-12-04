@@ -1419,7 +1419,7 @@ vfu_pci_setup_config_hdr(vfu_ctx_t *vfu_ctx, vfu_pci_hdr_id_t id,
 }
 
 int
-vfu_pci_setup_caps(vfu_ctx_t *vfu_ctx, vfu_cap_t **caps, int nr_caps)
+vfu_pci_setup_caps(vfu_ctx_t *vfu_ctx, vfu_pci_cap_t **caps, int nr_caps)
 {
     int ret;
 

@@ -45,9 +45,9 @@ int main(void)
 	vfu_pci_hdr_id_t id = { 0 };
 	vfu_pci_hdr_ss_t ss = { 0 };
 	vfu_pci_hdr_cc_t cc = { 0 };
-	vfu_cap_t pm = {.pm = {.hdr.id = PCI_CAP_ID_PM, .pmcs.nsfrst = 0x1}};
-    vfu_cap_t *vsc = alloca(sizeof(*vsc) + 0xd);
-    vfu_cap_t *caps[2] = {&pm, vsc};
+	vfu_pci_cap_t pm = {.pm = {.hdr.id = PCI_CAP_ID_PM, .pmcs.nsfrst = 0x1}};
+    vfu_pci_cap_t *vsc = alloca(sizeof(*vsc) + 0xd);
+    vfu_pci_cap_t *caps[2] = {&pm, vsc};
     vfu_ctx_t *vfu_ctx = vfu_create_ctx(VFU_TRANS_SOCK, "",
                                         LIBVFIO_USER_FLAG_ATTACH_NB, NULL,
                                         VFU_DEV_TYPE_PCI);

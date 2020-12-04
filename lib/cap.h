@@ -42,7 +42,7 @@ struct caps;
  * Initializes PCI capabilities.
  */
 struct caps *
-caps_create(vfu_ctx_t *vfu_ctx, vfu_cap_t **caps, int nr_caps, int *err);
+caps_create(vfu_ctx_t *vfu_ctx, vfu_pci_cap_t **caps, int nr_caps, int *err);
 
 /*
  * Conditionally accesses the PCI capabilities. Returns:
