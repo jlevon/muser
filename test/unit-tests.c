@@ -397,6 +397,14 @@ test_extended_caps(void **state __attribute__((unused)))
 }
 
 /*
+ * Tests adding an accessing a PCI vendor-specific capability.
+ */
+static void
+test_vsc(void **state __attribute__((unused)))
+{
+}
+
+/*
  * FIXME we shouldn't have to specify a setup function explicitly for each unit
  * test, cmocka should provide that. E.g. cmocka_run_group_tests enables us to
  * run a function before/after ALL unit tests have finished, we can extend it
@@ -420,6 +428,7 @@ int main(void)
         cmocka_unit_test_setup(test_dma_controller_remove_region_no_fd, setup),
         cmocka_unit_test_setup(test_process_command_free_passed_fds, setup),
         cmocka_unit_test_setup(test_extended_caps, setup),
+        cmocka_unit_test_setup(test_vsc, setup),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

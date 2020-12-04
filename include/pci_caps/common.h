@@ -46,6 +46,15 @@ _Static_assert(offsetof(struct cap_hdr, id) == PCI_CAP_LIST_ID, "bad offset");
 _Static_assert(offsetof(struct cap_hdr, next) == PCI_CAP_LIST_NEXT, "bad offset");
 
 /*
+ * Vendor-specific capability
+ */
+struct vsc {
+    struct cap_hdr  hdr;
+    uint8_t         size;
+    uint8_t         data[];
+} __attribute__ ((packed));
+
+/*
  * PCI Express extended capability header.
  */
 struct pcie_extended_cap_hdr {
